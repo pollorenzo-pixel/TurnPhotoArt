@@ -4,85 +4,90 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-TurnPhotoArt is a mobile-first consumer experience for turning a favourite photo into cheerful, handmade-style artwork. Phase 1 validates the complete one-page journey with an honest browser-generated style preview.
+TurnPhotoArt is a mobile-first experience for exploring how a favourite photo could feel as cheerful, handmade-style artwork. Phase 1.2 prepares the browser-local public preview for a safe first deployment without activating AI generation, uploads, payments, accounts, analytics, or storage.
 
-## Phase 1 preview status
+## Public-preview flow
 
-Phase 1 is intentionally local-only. It does **not** invoke OpenAI, another paid image API, external storage, a database, analytics, payments, or authentication. It needs no API key. Uploaded images are held only in a temporary browser object URL, are never permanently stored, and are released when replaced, removed, or the page closes.
+1. Choose or drag in a JPEG, PNG, or WebP image.
+2. Validate its type, signature, decoding, dimensions, and size locally.
+3. Watch a short mock progress sequence.
+4. Compare the original with an interactive CSS style treatment.
+5. Download a locally rendered PNG preview.
 
-The preserved legacy OpenAI generation implementation is future-only. The home page does not import its service, write a generation request to session storage, or navigate to the legacy results flow. `POST /api/photobooth` is hard-disabled with HTTP 410.
+The artwork effect is illustrative, not final AI artwork. Photos remain in the current browser tab and are not intentionally uploaded or permanently stored by TurnPhotoArt. Temporary browser blob URLs and Canvas resources are released after use.
 
-## Current flow
+## Safety boundary
 
-1. Read the product promise and privacy boundary.
-2. Drag in a photo or choose one from the device photo library.
-3. Validate and preview the selected image; replace or remove it at any time.
-4. Select **Make it playful ✨** for a short local progress sequence.
-5. Compare the original with a CSS-treated playful preview on the same page.
-6. Download a locally rendered Canvas preview or try another photo.
+- No OpenAI or other image-generation API call is active.
+- `POST /api/photobooth` is hard-disabled with HTTP 410 and `Cache-Control: no-store`.
+- No Local Storage, Session Storage, IndexedDB, database, analytics, payment, account, or external image-storage flow is used.
+- `/results` is a safe informational route that links back to the one-page studio.
+- `/api/health` exposes only `{ "status": "ok", "mode": "local-preview" }`.
 
-The result is labelled “Interactive style preview — full AI artwork coming in the next phase.” It is not presented as AI-generated artwork.
+## Upload limits
 
-## Tech stack
+- JPEG, PNG, and WebP only
+- Maximum file size: 10 MB
+- Maximum dimensions: 12,000 × 12,000 pixels
+- Maximum decoded size: 50 megapixels
+- Downloaded PNG preview longest edge: 2,048 pixels
 
-- Next.js 15 App Router
-- React 19 and TypeScript
-- Tailwind CSS 4 entry pipeline with custom responsive CSS
-- Lucide icons
-- Browser object URLs, CSS filters, and Canvas export
+Validation uses browser-native decoding plus MIME, extension, and magic-byte checks. SVG, GIF, HEIC, PDF, AVIF, TIFF, BMP, and arbitrary binaries are not accepted.
+
+## Tech stack and security
+
+- Next.js 15 App Router, React 19, TypeScript, and Tailwind CSS 4
+- Node `>=20.9.0 <27`; Node 26.0.0 and npm 11.12.1 were validated locally
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- Camera, microphone, and geolocation disabled through `Permissions-Policy`
+- `X-Frame-Options: DENY`; `X-Powered-By` disabled
+- CSP intentionally deferred until it can be tested separately with Next.js scripts and blob previews
+- `npm audit` reports zero vulnerabilities at Phase 1.2 completion
 
 ## Local setup
 
+No environment file or API key is required.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No `.env` file is required.
+Open [http://localhost:3000](http://localhost:3000).
 
-Other commands:
+Production-style validation:
 
 ```bash
+npm audit
 npm run lint
 npm run build
-npm start
+npm run start
 ```
 
-## Supported uploads
+## Optional deployment configuration
 
-- JPEG, PNG, and WebP
-- File picker, mobile photo library, and drag-and-drop
-- Maximum file size: 10 MB
-- Maximum dimensions: 12,000 × 12,000 pixels
-- Maximum decoded image size: 50 megapixels
+`SITE_URL` is a non-sensitive, server-side absolute HTTP(S) deployment URL, such as `https://turnphotoart.example`. Invalid or absent values are ignored; localhost is never added automatically as a canonical URL.
 
-Validation is entirely browser-local and checks MIME type, compatible extension, JPEG/PNG/WebP magic bytes, successful native decoding, non-zero dimensions, dimension limits, and pixel count. Unsupported, mismatched, corrupt, oversized, and unreadable images receive a calm inline error.
+`SITE_INDEXING_ENABLED=true` enables indexing only when `SITE_URL` is also valid. The default is `noindex`, `nofollow`, and a robots rule that disallows crawling. When enabled, the sitemap contains only `/`, `/privacy`, and `/terms`.
 
-## Phase 1.1 hardening
+## Vercel
 
-- Preview operations are deterministic: replacing or removing a photo cancels pending timers, and stale decode/progress work cannot publish a result.
-- Decoded `ImageBitmap` resources, temporary object URLs, download URLs, timers, and Canvas backing stores are released after use.
-- PNG preview export preserves aspect ratio and caps the longest edge at 2,048 pixels rather than rendering an unnecessarily large source Canvas.
-- Export failures are surfaced safely and repeated download/generation actions cannot overlap.
-- Basic response headers disable MIME sniffing, framing, camera, microphone, and geolocation access, and use a strict-origin referrer policy. A CSP is intentionally deferred until it can be tested as a separate production policy with Next.js scripts and blob previews.
-- Next.js and build dependencies received compatible patch/minor security updates. A narrow PostCSS 8 override replaces Next.js’s vulnerable pinned build-time release with a compatible fixed release. The post-update `npm audit` reports zero vulnerabilities.
+Import the GitHub repository with the repository root as the Root Directory. Vercel should detect Next.js automatically and use `npm run build`. There are no required environment variables, secrets, persistent runtime files, databases, or long-running jobs. See [DEPLOYMENT.md](./DEPLOYMENT.md) for the complete safe-deployment and smoke-test checklist.
 
 ## Current limitations
 
-- The playful treatment is an illustrative CSS/Canvas approximation, not generative AI.
-- It applies a single locked signature style; there are no prompts or style presets.
-- Canvas download intentionally approximates the live CSS treatment and may vary slightly by browser.
-- Canvas export strips no source metadata by parsing it; instead, it draws decoded pixels into a new PNG and intentionally adds no private metadata.
-- The preserved `/results` URL is an informational hand-back to the one-page studio.
+- The style preview is a CSS/Canvas approximation and varies slightly by browser and device.
+- The downloaded Canvas result may be visually simpler than the live comparison.
+- No purchase, print fulfilment, final artwork, or commercial guarantee is offered.
+- Hosting platforms may create ordinary technical delivery logs even though customer photos remain browser-local.
 
-## Phase 2 integration points
+Legal review and updated privacy/contract terms are required before enabling payments, real AI processing, accounts, remote storage, or fulfilment.
 
-- Keep the public one-page state model and replace only the local preview adapter with an authenticated server-side generation job.
-- Move the locked `playful-art` prompt definition in `lib/turn-photo-art.ts` to server-only configuration before enabling it.
-- Introduce explicit consent, retention, error, retry, and deletion policies before any image upload.
-- Re-enable or replace the isolated legacy route only after adding server-side authorization, rate limits, request validation, and cost controls.
-- Keep API credentials server-only; never expose them through `NEXT_PUBLIC_*` variables or browser bundles.
+## Phase 2 direction
+
+Keep the current one-page state model, but introduce generation only through an authenticated server-side job with explicit consent, retention/deletion rules, validation, rate limits, cost controls, and server-only credentials. The locked prompt must move to server-only configuration before activation.
 
 ## License and attribution
 
-TurnPhotoArt is licensed under the [MIT License](./LICENSE). The project began from OpenAI’s ImageGen Photobooth demo. Original third-party notices remain preserved in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+TurnPhotoArt is licensed under the [MIT License](./LICENSE). The project began from OpenAI’s ImageGen Photobooth demo. Original third-party notices remain in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).

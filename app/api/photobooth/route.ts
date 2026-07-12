@@ -10,7 +10,6 @@ import {
 import { normalizePhotoboothStyleIds } from "@/lib/photobooth-style-utils";
 import {
   findPhotoboothStyle,
-  PHOTOBOOTH_STYLES,
   type PhotoboothStyleId,
 } from "@/lib/photobooth-styles";
 import { formatSseChunk, parseSseChunk } from "@/lib/sse";
@@ -383,16 +382,6 @@ void futurePhasePost;
 export async function POST() {
   return Response.json(
     { error: { message: "Image generation is disabled during the local-only Phase 1 preview." } },
-    { status: 410 },
+    { status: 410, headers: { "Cache-Control": "no-store" } },
   );
-}
-
-export async function GET() {
-  return Response.json({
-    styles: PHOTOBOOTH_STYLES.map(({ id, label, description }) => ({
-      id,
-      label,
-      description,
-    })),
-  });
 }

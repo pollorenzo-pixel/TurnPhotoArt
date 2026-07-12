@@ -190,7 +190,7 @@ export default function HomePage() {
       <div className="paper-noise" aria-hidden="true" />
       <div className="page-shell">
         <SiteHeader />
-        <main>
+        <main id="main-content">
           <section className="hero" aria-labelledby="hero-title">
             <span className="hero-spark spark-one" aria-hidden="true">✦</span>
             <span className="hero-spark spark-two" aria-hidden="true">✧</span>

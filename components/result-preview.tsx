@@ -18,7 +18,7 @@ export function ResultPreview(props: ResultPreviewProps) {
       <div className="result-heading">
         <div>
           <h2 id="result-title">A little more colour. A lot more character.</h2>
-          <p>Interactive style preview — full AI artwork coming in the next phase</p>
+          <p>Interactive style preview — full AI artwork generation is coming later.</p>
         </div>
         <span className="local-badge">Local preview</span>
       </div>

@@ -7,7 +7,10 @@ export function SiteHeader() {
         <span aria-hidden="true" className="wordmark-mark">T</span>
         {PRODUCT.name}
       </a>
-      <span className="studio-label">{PRODUCT.eyebrow}</span>
+      <div className="header-labels">
+        <span className="studio-label">{PRODUCT.eyebrow}</span>
+        <span className="preview-badge">Public Preview</span>
+      </div>
     </header>
   );
 }

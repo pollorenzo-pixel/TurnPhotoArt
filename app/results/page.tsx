@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function LegacyResultsPage() {
   return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+    <main id="main-content" style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
       <section style={{ maxWidth: 560, textAlign: "center" }}>
         <p className="section-kicker">TurnPhotoArt Phase 1</p>
         <h1 style={{ fontSize: "clamp(42px, 8vw, 72px)", letterSpacing: "-.06em", lineHeight: 1, margin: "20px 0" }}>The studio now lives on one page.</h1>

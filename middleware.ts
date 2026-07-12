@@ -32,6 +32,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  if (req.method === "GET" && req.nextUrl.pathname === "/api/health") {
+    return NextResponse.next();
+  }
+
   if (req.method === "OPTIONS") {
     return new NextResponse(null, { status: 204 });
   }
