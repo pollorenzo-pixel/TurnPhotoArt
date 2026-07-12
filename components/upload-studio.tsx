@@ -9,7 +9,7 @@ type UploadStudioProps = {
   fileName: string;
   error: string;
   isProcessing: boolean;
-  onFile: (file: File) => void;
+  onFile: (file: File) => void | Promise<void>;
   onRemove: () => void;
   onGenerate: () => void;
 };
@@ -29,12 +29,12 @@ export function UploadStudio({ imageUrl, fileName, error, isProcessing, onFile, 
   };
 
   return (
-    <section className="studio" id="studio" aria-labelledby="studio-title">
+    <section className="studio" id="studio" aria-labelledby="studio-title" aria-busy={isProcessing}>
       <div className="studio-copy">
         <span className="section-kicker"><span /> Your photo studio</span>
         <h2 id="studio-title">Start with a photo you love.</h2>
         <p>Portrait, pet, plate or place — if it matters to you, it belongs here.</p>
-        <div className="privacy-note"><span aria-hidden="true">✓</span><p><b>Private by default</b><br />Nothing leaves your browser in this preview.</p></div>
+        <div className="privacy-note"><span aria-hidden="true">✓</span><p><b>Private by default</b><br />Your photo stays in this browser tab and is not uploaded.</p></div>
       </div>
 
       <div className="upload-card">
@@ -76,7 +76,7 @@ export function UploadStudio({ imageUrl, fileName, error, isProcessing, onFile, 
             <div className="upload-icon" aria-hidden="true"><Upload /></div>
             <h3>Drop your photo here</h3>
             <p>or choose one from your device</p>
-            <button className="button button-blue" type="button" onClick={() => inputRef.current?.click()}>Choose a photo</button>
+            <button id="choose-photo-button" className="button button-blue" type="button" onClick={() => inputRef.current?.click()}>Choose a photo</button>
             <span id="upload-formats">JPEG, PNG or WebP · Up to {PREVIEW_CONFIG.maxFileBytes / 1024 / 1024} MB</span>
           </div>
         )}
