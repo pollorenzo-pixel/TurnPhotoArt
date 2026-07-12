@@ -236,7 +236,8 @@ async function runStyleEdit(
   throw new Error("No image was returned for this style.");
 }
 
-export async function POST(request: NextRequest) {
+// Preserved for a deliberate Phase 2 migration. This function is not an HTTP handler.
+async function futurePhasePost(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
     return Response.json(
@@ -373,6 +374,17 @@ export async function POST(request: NextRequest) {
       "X-Accel-Buffering": "no",
     },
   });
+}
+
+// Keep the future implementation type-checked without exposing it as a route export.
+void futurePhasePost;
+
+// Phase 1 hard stop: the legacy generation endpoint cannot call an external service.
+export async function POST() {
+  return Response.json(
+    { error: { message: "Image generation is disabled during the local-only Phase 1 preview." } },
+    { status: 410 },
+  );
 }
 
 export async function GET() {
