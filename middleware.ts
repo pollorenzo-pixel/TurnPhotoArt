@@ -60,7 +60,9 @@ export function middleware(req: NextRequest) {
 
   if (req.method === "POST") {
     const contentType = (req.headers.get("content-type") || "").toLowerCase();
-    if (!contentType.startsWith("application/json")) {
+    const isArtworkUpload = req.nextUrl.pathname === "/api/artwork-sets" || req.nextUrl.pathname === "/api/artwork-sets/generate";
+    const isSupported = isArtworkUpload ? contentType.startsWith("multipart/form-data;") : contentType.startsWith("application/json");
+    if (!isSupported) {
       return NextResponse.json(
         { error: "Unsupported Media Type" },
         { status: 415 },

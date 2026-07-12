@@ -8,13 +8,13 @@ export const metadata: Metadata = {
     default: "TurnPhotoArt — Turn photos into playful artwork",
     template: "%s — TurnPhotoArt",
   },
-  description: "Upload a favourite photo and explore a colourful, handmade-style artwork preview directly in your browser.",
+  description: "Discover TurnPhotoArt's two handcrafted house styles. Private artwork generation testing is underway.",
   metadataBase: SITE_URL ? new URL(SITE_URL) : undefined,
   alternates: SITE_URL ? { canonical: SITE_URL } : undefined,
   robots: { index: IS_INDEXING_ENABLED, follow: IS_INDEXING_ENABLED },
   openGraph: {
     title: "TurnPhotoArt — Turn photos into playful artwork",
-    description: "Upload a favourite photo and explore a colourful, handmade-style artwork preview directly in your browser.",
+    description: "Discover TurnPhotoArt's two handcrafted house styles. Private artwork generation testing is underway.",
     type: "website",
     siteName: "TurnPhotoArt",
     url: SITE_URL ?? undefined,
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: SITE_URL ? "summary_large_image" : "summary",
     title: "TurnPhotoArt — Turn photos into playful artwork",
-    description: "Upload a favourite photo and explore a colourful, handmade-style artwork preview directly in your browser.",
+    description: "Discover TurnPhotoArt's two handcrafted house styles. Private artwork generation testing is underway.",
     images: SITE_URL ? [absoluteSiteUrl("/social-preview")!] : undefined,
   },
   icons: {

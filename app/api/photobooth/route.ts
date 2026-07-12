@@ -381,7 +381,7 @@ void futurePhasePost;
 // Phase 1 hard stop: the legacy generation endpoint cannot call an external service.
 export async function POST() {
   return Response.json(
-    { error: { message: "Image generation is disabled during the local-only Phase 1 preview." } },
+    { error: { message: "This legacy generation endpoint is permanently disabled." } },
     { status: 410, headers: { "Cache-Control": "no-store" } },
   );
 }

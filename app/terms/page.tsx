@@ -5,12 +5,13 @@ export const metadata: Metadata = { title: "Preview Terms", description: "Plain-
 
 export default function TermsPage() {
   return (
-    <LegalPage eyebrow="Preview terms" title="A preview, made for exploring." intro="These simple terms describe the free browser-local preview available today. They are not final commercial terms for a paid product.">
-      <section><h2>What the preview is</h2><p>TurnPhotoArt currently offers an illustrative local artwork effect. It is not final AI-generated artwork, a printing service, or a paid product. Real AI generation and commercial terms will be introduced separately if those services launch.</p></section>
-      <section><h2>Your photos</h2><p>You must own or have permission to use any photo you select. Do not use the preview with unlawful, abusive, infringing, or harmful material.</p></section>
-      <section><h2>Preview output</h2><p>Results may look different across browsers, screens, and devices. Downloaded previews are provided for exploration and do not include a guarantee that they are suitable for commercial printing, professional production, or any particular purpose.</p></section>
-      <section><h2>Availability and changes</h2><p>This is an early preview. Features, styling, limits, and availability may change, pause, or stop without notice while the product is developed.</p></section>
-      <section><h2>Before a commercial launch</h2><p>TurnPhotoArt will need separate legal review and updated terms before enabling payments, real AI processing, fulfilment, accounts, or other commercial services.</p></section>
+    <LegalPage eyebrow="Private-test terms" title="An invite-only artwork test." intro="These simple terms describe trusted friends-and-family testing. They are not final paid-customer terms.">
+      <section><h2>What the test includes</h2><p>No payment is collected and no service-level guarantee is offered. Each artwork set is locked to one reference image and includes up to three successfully completed, downloadable versions. Confirmed failures and safety blocks do not consume a successful version.</p></section>
+      <section><h2>Your photos and conduct</h2><p>You must own or have permission to use every uploaded image. Do not upload unlawful, abusive, infringing, or harmful material. Safety systems may block a request or output.</p></section>
+      <section><h2>Results and availability</h2><p>Generated results can vary. Download every result you want to keep before leaving: refreshing or closing the tab may remove it. Results have no commercial-print guarantee. The test may pause, change, or be unavailable without notice.</p></section>
+      <section><h2>Reference and version rules</h2><p>The reference image cannot change within an artwork set. A different reference requires a new set. Style and optional personality details may change between successful versions.</p></section>
+      <section><h2>Marketing permission</h2><p>Participating does not give TurnPhotoArt permission to publish an original or generated image. Any showcase use requires separate, explicit written consent and manual review.</p></section>
+      <section><h2>Before a commercial launch</h2><p>Separate legal review and new commercial terms are required before payments, public customer processing, accounts, printing, storage, or fulfilment.</p></section>
     </LegalPage>
   );
 }
