@@ -1,6 +1,6 @@
 import type { HouseStyleId } from "@/lib/server/house-styles";
 
-export const PROMPT_VERSION = "turnphotoart-prompt-v2";
+export const PROMPT_VERSION = "turnphotoart-prompt-v3";
 
 const SHARED_PRESERVATION_RULES = `Transform the uploaded reference photo into one polished, finished illustrated artwork.
 
@@ -14,11 +14,27 @@ Do not replace the main subject or invent a different central subject.
 
 Do not unnecessarily change ethnicity, age, facial structure, body shape, species or defining features.
 
-Preserve the source photo’s dominant colour relationships unless optional personality guidance clearly requests a different colour mood.
+Colour fidelity is a high-priority preservation rule.
+
+Preserve the uploaded photo’s original white balance, dominant hues, local colours and cool-versus-warm relationships.
+
+Apply the selected illustration style through shape, linework, shading, texture, grain, painterly treatment and handmade detail—not through a global colour tint.
+
+Do not apply an overall yellow, orange, amber, sepia, golden-hour, vintage or warm-filter treatment unless the customer explicitly requests that colour mood.
+
+Keep skin tones close to the uploaded reference photo.
+
+Keep neutral black, grey and white areas neutral.
+
+Preserve clearly identifiable source colours, including backgrounds, clothing, accessories, objects and environmental details.
+
+Optional decorative elements may introduce their own colours, but those colours must not cast a global tint over the subject or the original scene.
+
+Colours may be slightly simplified, saturated, softened, posterised or painterly when appropriate to the selected style, but the source image’s overall palette, local colour identity and white balance must remain recognisable.
 
 Background details may be simplified or artistically reinterpreted when useful, but they must continue to support the original subject and scene.
 
-Optional personality guidance is secondary. It may influence decorations, colour mood, atmosphere or supporting details, but it must never override subject recognisability, safety rules or the selected house style.`;
+Optional personality guidance is secondary. It may influence supporting decorations, background flavour, atmosphere, small colour accents, playful objects, mood or secondary visual storytelling, but it must never override subject recognisability, source colour fidelity, safety rules or the selected house style.`;
 
 const BOLD_PLAYFUL_STYLE = `Render the reference as a Bold & Playful contemporary editorial illustration.
 
@@ -36,13 +52,13 @@ The image should feel energetic, cheerful, stylish and premium rather than child
 
 Keep details intentionally simplified and graphic.
 
-Use the uploaded photo’s colour relationships as the foundation rather than copying colours from the development reference.
+Use the uploaded photo’s palette as the foundation. Preserve graphic colour blocking without introducing a default warm palette, amber lighting, yellow skin cast, sepia treatment, warm vintage grading or colour spill from decorative elements across the whole image.
 
 The finished result should feel like a bold contemporary art print: playful, tactile, recognisable and visually confident.`;
 
 const PLAYFUL_STORYBOOK_STYLE = `Render the reference as a Playful Storybook illustration with expressive hand-drawn linework and painterly colour.
 
-Use lively, flowing and slightly imperfect lines that create warmth, motion and personality.
+Use lively, flowing and slightly imperfect lines that create emotional warmth, motion and personality.
 
 Use organic shapes, loose sketch energy, expressive gestures and carefully simplified details.
 
@@ -50,13 +66,13 @@ Create painterly colour areas with a gouache, watercolour, coloured-pencil or di
 
 Preserve the subject’s recognisability while allowing charming illustrated expression and gentle exaggeration.
 
-Give the composition a sense of narrative, emotional warmth and playful movement, even when the source photo is calm or simple.
+Give the composition a sense of narrative, emotional warmth and playful movement, even when the source photo is calm or simple. Warmth describes the emotional atmosphere, not a mandatory warm colour temperature or warm colour grading.
 
 Supporting background elements may be softened, simplified or made more whimsical while remaining connected to the original scene.
 
-The image should feel contemporary, warm, imaginative and emotionally engaging rather than overly polished, photorealistic or flat.
+The image should feel contemporary, lively, charming, imaginative and emotionally engaging rather than overly polished, photorealistic or flat.
 
-Use the uploaded photo’s colour relationships as the foundation rather than copying colours from the development reference.
+Keep the uploaded photo’s original palette and white balance recognisable even when the rendering becomes softer or more painterly. Do not automatically introduce golden lighting, a yellow or orange skin tint, sepia, nostalgic warm filters, an amber wash over cool backgrounds or loss of neutral blacks, greys or whites.
 
 The finished result should feel like a memorable page from a modern illustrated storybook: expressive, charming, dynamic and recognisable.`;
 
@@ -74,9 +90,9 @@ function personalitySection(personality: string | null) {
   if (!personality) return null;
   return `Optional personality guidance from the customer: ${personality}
 
-Apply this only as secondary direction for colour mood, atmosphere, decorations, background flavour or playful supporting details.
+Apply this only as secondary direction for supporting decorations, background flavour, atmosphere, small colour accents, playful objects, mood or secondary visual storytelling. Requested decorative elements may use their own colours, but they must not recolour the entire artwork.
 
-Do not let it replace the main subject, contradict the selected house style or reduce recognisability.`;
+Do not let it replace the main subject, contradict the selected house style, reduce recognisability or override source colour fidelity or safety rules.`;
 }
 
 function assemblePrompt(styleBlock: string, personality: string | null) {
