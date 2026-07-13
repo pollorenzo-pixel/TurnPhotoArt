@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { buildGenerationPrompt, PROMPT_VERSION } from "../lib/server/house-styles";
 import { normalizePersonality } from "../lib/server/personality";
@@ -36,12 +37,26 @@ test("fake provider is deterministic local PNG and simulates safe states", async
 test("three successes count once, fourth is rejected, and idempotency replays", async () => {
   resetMemoryState(); const token="t".repeat(64); await memoryStore.createSet(baseSet(token));
   let thirdId="";for(let i=1;i<=3;i++){const held=await memoryStore.reserve(reserve(token,String(i)));thirdId=held.generation.id;await memoryStore.markProcessing(held.generation.id);const settled=await memoryStore.settle(held.generation.id,"succeeded");assert.equal(settled.successfulCount,i);}const completedReplay=await memoryStore.reserve(reserve(token,"3"));assert.equal(completedReplay.kind,"existing");assert.equal(completedReplay.generation.id,thirdId);
+  const completeSet=await memoryStore.findSet(token);assert.equal(completeSet?.successfulCount,3);assert.equal(completeSet?.status,"complete");
   await assert.rejects(memoryStore.reserve(reserve(token,"4")),/artwork_set_invalid|generation_limit_reached/);
   resetMemoryState();await memoryStore.createSet(baseSet(token));const first=await memoryStore.reserve(reserve(token,"idem"));const replay=await memoryStore.reserve(reserve(token,"idem"));assert.equal(replay.kind,"existing");assert.equal(first.generation.id,replay.generation.id);
 });
 
-test("failures release success entitlement, unknown keeps cost reservation, concurrency blocks", async () => {
+test("private studio ends after three versions and keeps every download visible", () => {
+  const source=readFileSync(new URL("../components/private-studio.tsx",import.meta.url),"utf8");
+  assert.match(source,/Private test complete/);
+  assert.match(source,/You’ve created all three artwork versions included in this private test\. Download any version you’d like to keep\./);
+  assert.match(source,/results\.map\(\(result\)=>/);
+  assert.match(source,/Download artwork/);
+  assert.match(source,/successfulCount<3/);
+  assert.doesNotMatch(source,/Create artwork from a new photo/);
+  assert.doesNotMatch(source,/newSet|setNumber|previousResults|Earlier completed artwork/);
+});
+
+test("failed and blocked requests preserve success entitlement; unknown keeps cost reservation; concurrency blocks", async () => {
   resetMemoryState();const token="f".repeat(64);await memoryStore.createSet(baseSet(token));const failed=await memoryStore.reserve(reserve(token,"fail"));await memoryStore.markProcessing(failed.generation.id);assert.equal((await memoryStore.settle(failed.generation.id,"failed")).successfulCount,0);
-  const active=await memoryStore.reserve(reserve(token,"active"));await assert.rejects(memoryStore.reserve(reserve(token,"other")),/set_generation_active/);await memoryStore.markProcessing(active.generation.id);await memoryStore.settle(active.generation.id,"unknown");
+  const blocked=await memoryStore.reserve(reserve(token,"blocked"));await memoryStore.markProcessing(blocked.generation.id);assert.equal((await memoryStore.settle(blocked.generation.id,"blocked")).successfulCount,0);
+  for(let version=1;version<=3;version++){const held=await memoryStore.reserve(reserve(token,`success-${version}`));await memoryStore.markProcessing(held.generation.id);await memoryStore.settle(held.generation.id,"succeeded");}assert.equal((await memoryStore.findSet(token))?.successfulCount,3);
+  const unknownToken="u".repeat(64);await memoryStore.createSet(baseSet(unknownToken));const active=await memoryStore.reserve(reserve(unknownToken,"active"));await assert.rejects(memoryStore.reserve(reserve(unknownToken,"other")),/set_generation_active/);await memoryStore.markProcessing(active.generation.id);await memoryStore.settle(active.generation.id,"unknown");
   const other="o".repeat(64);await memoryStore.createSet(baseSet(other));await assert.rejects(memoryStore.reserve(reserve(other,"cost",{dailyCostLimitUnits:100,sessionHash:"x".repeat(64)})),/daily_cost_limit/);
 });
