@@ -17,6 +17,6 @@ export async function POST(request: NextRequest) {
     return noStoreJson({ artworkSetToken: token, successfulCount: record.successfulCount, expiresAt: record.expiresAt });
   } catch (error) {
     const code = error instanceof Error ? error.message : "internal_error";
-    return noStoreJson({ error: ["invalid_image","unsupported_image","unreadable_image","image_dimensions_exceeded","request_too_large"].includes(code) ? "Choose a valid JPEG, PNG or WebP within the upload limits." : "The artwork set could not be created." }, code === "private_access_required" ? 401 : 400);
+    return noStoreJson({ error: ["invalid_image","unsupported_image","unreadable_image","image_dimensions_exceeded","request_too_large"].includes(code) ? "Choose a valid JPEG, PNG or WebP within the upload limits." : "The artwork could not be prepared." }, code === "private_access_required" ? 401 : 400);
   }
 }
