@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { operatingMode, PRIVATE_TEST_REQUEST_LIMIT_CEILING } from "../lib/server/config";
 import { buildGenerationPrompt, PROMPT_VERSION } from "../lib/server/house-styles";
 import { normalizePersonality } from "../lib/server/personality";
 import { fakeProvider } from "../lib/server/providers/fake";
@@ -9,7 +10,7 @@ import { memoryStore, resetMemoryState } from "../lib/server/state/memory";
 import type { ReserveInput } from "../lib/server/state/types";
 
 const baseSet = (tokenHash: string) => ({ tokenHash, referenceSha256: "a".repeat(64), mimeType: "image/png", width: 1000, height: 1000, expiresAt: new Date(Date.now()+86_400_000).toISOString() });
-const reserve = (tokenHash: string, id: string, overrides: Partial<ReserveInput> = {}): ReserveInput => ({ tokenHash, idempotencyHash: id.padEnd(64,"0"), sessionHash: "s".repeat(64), ipHash: "i".repeat(64), styleId: "bold-playful", personalityLength: 0, personalityHash: null, promptVersion: PROMPT_VERSION, model: "gpt-image-2", quality: "medium", size: "1024x1024", dailyRequestLimit: 20, hourlyIpLimit: 20, globalConcurrencyLimit: 2, dailyCostLimitUnits: 1000, reservationUnits: 100, ...overrides });
+const reserve = (tokenHash: string, id: string, overrides: Partial<ReserveInput> = {}): ReserveInput => ({ tokenHash, idempotencyHash: id.padEnd(64,"0"), sessionHash: "s".repeat(64), ipHash: "i".repeat(64), styleId: "bold-playful", personalityLength: 0, personalityHash: null, promptVersion: PROMPT_VERSION, model: "gpt-image-2", quality: "medium", size: "1024x1024", dailyRequestLimit: operatingMode.dailyRequestLimit, hourlyIpLimit: operatingMode.hourlyIpLimit, globalConcurrencyLimit: 2, dailyCostLimitUnits: 1000, reservationUnits: 100, ...overrides });
 
 test("personality normalization enforces 160 characters and control safety", () => {
   assert.equal(normalizePersonality("  Yellow   flowers  "), "Yellow flowers");
@@ -42,6 +43,14 @@ test("three successes count once, fourth is rejected, and idempotency replays", 
   resetMemoryState();await memoryStore.createSet(baseSet(token));const first=await memoryStore.reserve(reserve(token,"idem"));const replay=await memoryStore.reserve(reserve(token,"idem"));assert.equal(replay.kind,"existing");assert.equal(first.generation.id,replay.generation.id);
 });
 
+test("private-test request counts do not block versions while the three-success cap remains active", async () => {
+  assert.equal(operatingMode.dailyRequestLimit,PRIVATE_TEST_REQUEST_LIMIT_CEILING);
+  assert.equal(operatingMode.hourlyIpLimit,PRIVATE_TEST_REQUEST_LIMIT_CEILING);
+  const routeSource=readFileSync(new URL("../app/api/artwork-sets/generate/route.ts",import.meta.url),"utf8");
+  assert.doesNotMatch(routeSource,/Please wait before creating another version/);
+  assert.doesNotMatch(routeSource,/private test has reached its daily request limit/i);
+});
+
 test("private studio ends after three versions and keeps every download visible", () => {
   const source=readFileSync(new URL("../components/private-studio.tsx",import.meta.url),"utf8");
   assert.match(source,/Private test complete/);
@@ -49,6 +58,8 @@ test("private studio ends after three versions and keeps every download visible"
   assert.match(source,/results\.map\(\(result\)=>/);
   assert.match(source,/Download artwork/);
   assert.match(source,/successfulCount<3/);
+  assert.match(source,/role="status" aria-live="polite"/);
+  assert.match(source,/role="alert"/);
   assert.doesNotMatch(source,/Create artwork from a new photo/);
   assert.doesNotMatch(source,/newSet|setNumber|previousResults|Earlier completed artwork/);
 });

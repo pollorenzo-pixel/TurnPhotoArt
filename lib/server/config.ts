@@ -6,14 +6,19 @@ const positiveInt = (value: string | undefined, fallback: number) => {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+// Keep the existing Supabase RPC signature compatible while retiring request-count
+// limits from the friends-and-family tester flow. PostgreSQL integer max is used
+// instead of an unbounded or invalid value; Cost Guard and concurrency stay active.
+export const PRIVATE_TEST_REQUEST_LIMIT_CEILING = 2_147_483_647;
+
 export const operatingMode = {
   aiEnabled: process.env.TURNPHOTOART_AI_ENABLED === "true",
   privateTestEnabled: process.env.TURNPHOTOART_PRIVATE_TEST_ENABLED === "true",
   paused: process.env.TURNPHOTOART_GENERATION_PAUSED !== "false",
   provider: (process.env.TURNPHOTOART_IMAGE_PROVIDER === "openai" ? "openai" : "fake") as ImageProviderName,
   quality: (process.env.TURNPHOTOART_IMAGE_QUALITY === "high" ? "high" : "medium") as ImageQuality,
-  dailyRequestLimit: positiveInt(process.env.TURNPHOTOART_DAILY_REQUEST_LIMIT, 6),
-  hourlyIpLimit: positiveInt(process.env.TURNPHOTOART_HOURLY_IP_LIMIT, 3),
+  dailyRequestLimit: PRIVATE_TEST_REQUEST_LIMIT_CEILING,
+  hourlyIpLimit: PRIVATE_TEST_REQUEST_LIMIT_CEILING,
   globalConcurrencyLimit: positiveInt(process.env.TURNPHOTOART_GLOBAL_CONCURRENCY_LIMIT, 1),
   dailyCostLimitUnits: positiveInt(process.env.TURNPHOTOART_DAILY_COST_LIMIT_UNITS, 1000),
   reservationUnits: positiveInt(process.env.TURNPHOTOART_COST_RESERVATION_UNITS_PER_GENERATION, 100),

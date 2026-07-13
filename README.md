@@ -30,7 +30,9 @@ It also requires valid private-access, Supabase, and OpenAI configuration. Missi
 
 ## Three successful versions and Cost Guard
 
-Atomic Supabase RPCs enforce three successful generations, one active operation per set/session, global concurrency, daily requests, hourly rotating-IP-hash limits, daily reserved-cost units, and idempotency. Confirmed failures and moderation blocks do not increment the successful count. Unknown provider timeouts retain their reservation and are not retried automatically.
+Atomic Supabase RPCs enforce three successful generations, one active operation per set/session, global concurrency, daily reserved-cost units, and idempotency. Hourly-IP and daily-request counts are retained in the compatible state-layer interface but are not active tester-facing blockers in this friends-and-family flow. Confirmed failures and moderation blocks do not increment the successful count. Unknown provider timeouts retain their reservation and are not retried automatically.
+
+A successful usable PNG consumes its version when server settlement succeeds, whether or not the tester clicks download. Download is a browser delivery convenience; every successful card remains available until the tab is refreshed or closed.
 
 Cost units are conservative internal reservation units, not currency or guaranteed provider billing. OpenAI dashboard alerts are supplementary and never the only hard control.
 

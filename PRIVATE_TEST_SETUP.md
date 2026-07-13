@@ -11,7 +11,7 @@
 7. Keep `TURNPHOTOART_GENERATION_PAUSED=true`.
 8. Deploy to a private Vercel preview environment with indexing disabled.
 9. Set provider `fake`; validate access, fingerprint locking, both styles, personality limits, idempotency, three-success rule, downloads, and safe failure simulations.
-10. Review and set strict daily request, hourly IP, global concurrency, and daily cost-reservation limits.
+10. Review and set strict global concurrency and daily cost-reservation limits. Hourly-IP and daily-request counts do not limit the current friends-and-family tester flow; the per-set cap is three successful versions.
 11. After code/database review, change `TURNPHOTOART_IMAGE_PROVIDER=openai` while generation remains paused.
 12. Confirm the server can boot without exposing configuration; do not make a generation call yet.
 13. Only after explicit owner approval of one charge, set `TURNPHOTOART_GENERATION_PAUSED=false` and perform exactly one manually approved generation.
