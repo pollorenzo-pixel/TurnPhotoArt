@@ -12,7 +12,7 @@ import {
 const occurrences = (value: string, needle: string) => value.split(needle).length - 1;
 
 test("prompt version and style router are deterministic", () => {
-  assert.equal(PROMPT_VERSION, "turnphotoart-prompt-v5");
+  assert.equal(PROMPT_VERSION, "turnphotoart-prompt-v6");
   assert.equal(buildArtworkPrompt({ style: "bold-playful" }), buildBoldPlayfulPrompt());
   assert.equal(buildArtworkPrompt({ style: "playful-storybook" }), buildPlayfulStorybookPrompt());
   assert.equal(buildGenerationPrompt("bold-playful", null), buildBoldPlayfulPrompt());
@@ -36,6 +36,9 @@ test("Bold & Playful contains only its style language and shared preservation", 
   assert.match(prompt, /Stylise skin, fabrics and the background into graphic planes and tactile illustrated shapes/);
   assert.match(prompt, /must not resemble a painted photo, semi-realistic portrait art, timid photorealism or realistic digital painting/);
   assert.match(prompt, /energetic, cheerful, product-worthy, poster-like energy/);
+  assert.match(prompt, /simplified graphic facial planes, flatter illustrated shading, confident shape boundaries/);
+  assert.match(prompt, /restrained highlights, slightly posterised colour areas and tactile chalk, print or pastel grain/);
+  assert.match(prompt, /glossy realistic skin, smooth photographic airbrushing, detailed realistic facial lighting/);
   assert.match(prompt, /default warm palette, amber lighting, yellow skin cast, sepia treatment, warm vintage grading/);
   assert.doesNotMatch(prompt, /Playful Storybook illustration/);
   assert.doesNotMatch(prompt, /Optional personality guidance from the customer:/);
@@ -57,10 +60,41 @@ test("Playful Storybook contains only its style language and shared preservation
   assert.match(prompt, /realistic overpaint, quasi-photographic rendering, muddy detail retention/);
   assert.match(prompt, /simple “photo but softer” treatment/);
   assert.match(prompt, /hand-crafted, whimsical children’s-book artwork/);
+  assert.match(prompt, /simplified painterly forms, expressive hand-drawn contours, gentle illustrated exaggeration/);
+  assert.match(prompt, /charming storybook-character interpretation with soft but clearly non-photographic rendering/);
+  assert.match(prompt, /realistic watercolour portrait rendering, detailed photographic facial structure, realistic skin gloss/);
   assert.match(prompt, /Warmth describes the emotional atmosphere, not a mandatory warm colour temperature or warm colour grading/);
   assert.match(prompt, /golden lighting, a yellow or orange skin tint, sepia, nostalgic warm filters, an amber wash over cool backgrounds/);
   assert.doesNotMatch(prompt, /Bold & Playful contemporary editorial illustration/);
   assert.doesNotMatch(prompt, /Optional personality guidance from the customer:/);
+});
+
+test("both styles simplify faces while preserving recognisable identity and expression", () => {
+  for (const prompt of [buildBoldPlayfulPrompt(), buildPlayfulStorybookPrompt()]) {
+    assert.match(prompt, /Facial rendering must be clearly illustrated while preserving recognisable identity, expression, facial proportions and important defining features/);
+    assert.match(prompt, /Simplify facial planes into illustrated shapes/);
+    assert.match(prompt, /Remove pore-level or camera-level detail/);
+    assert.match(prompt, /reduce photographic skin texture and realistic specular highlights/);
+    assert.match(prompt, /avoid polished photographic portrait rendering or realistic digital-painting facial modelling/);
+    assert.match(prompt, /Redraw the eyes, nose, mouth and facial contours consistently with the selected house style/);
+    assert.match(prompt, /face must feel intentionally redrawn rather than photo-painted/);
+  }
+});
+
+test("generation prompt adds source-shape composition safety without breaking two-argument compatibility", () => {
+  assert.equal(buildGenerationPrompt("bold-playful", null), buildBoldPlayfulPrompt());
+  const portrait = buildGenerationPrompt("bold-playful", null, { width: 900, height: 1600 });
+  const landscape = buildGenerationPrompt("playful-storybook", null, { width: 1600, height: 900 });
+  const square = buildGenerationPrompt("bold-playful", null, { width: 1200, height: 1200 });
+  assert.match(portrait, /portrait final canvas matching the uploaded source aspect ratio/);
+  assert.match(landscape, /landscape final canvas matching the uploaded source aspect ratio/);
+  assert.match(square, /square final canvas matching the uploaded source aspect ratio/);
+  for (const prompt of [portrait, landscape, square]) {
+    assert.match(prompt, /minimal full-bleed cover crop/);
+    assert.match(prompt, /away from crop-sensitive outer edges/);
+    assert.match(prompt, /face, head, headwear, shoulders, body, clothing and accessory details inside a stable central composition-safe area/);
+    assert.match(prompt, /background illustration extend naturally and continuously to every outer edge/);
+  }
 });
 
 test("both styles require decisive non-photographic transformation", () => {
@@ -101,6 +135,7 @@ test("personality appears exactly once and remains secondary", () => {
   assert.equal(occurrences(prompt, personality), 1);
   assert.match(prompt, /Apply this only as secondary direction/);
   assert.match(prompt, /Requested decorative elements may use their own colours, but they must not recolour the entire artwork/);
+  assert.match(prompt, /Decorations must not overcrowd or obscure the face, head, body silhouette or defining features/);
   assert.match(prompt, /must never override subject recognisability/);
   assert.match(prompt, /must never override subject recognisability, source colour fidelity, safety rules or the selected house style/);
   assert.match(prompt, /Do not let it replace the main subject/);

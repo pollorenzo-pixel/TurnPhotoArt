@@ -2,18 +2,21 @@ import sharp from "sharp";
 
 type Dimensions = { width: number; height: number };
 
-export function sourceRatioDimensions(sourceWidth: number, sourceHeight: number, maxEdge: number): Dimensions {
-  if (sourceWidth >= sourceHeight) {
-    return { width: maxEdge, height: Math.max(1, Math.round(maxEdge * sourceHeight / sourceWidth)) };
-  }
-  return { width: Math.max(1, Math.round(maxEdge * sourceWidth / sourceHeight)), height: maxEdge };
-}
+// Bound decoded export memory while retaining original upload dimensions whenever
+// practical. The two limits are equivalent for a square but are both explicit so
+// future changes cannot accidentally permit an oversized edge or pixel area.
+export const MAX_EXPORT_EDGE = 2_048;
+export const MAX_EXPORT_PIXELS = 4_194_304;
 
-export function containedDimensions(inputWidth: number, inputHeight: number, targetWidth: number, targetHeight: number): Dimensions {
-  const scale = Math.min(targetWidth / inputWidth, targetHeight / inputHeight, 1);
+export function sourceRatioDimensions(sourceWidth: number, sourceHeight: number): Dimensions {
+  const scale = Math.min(
+    1,
+    MAX_EXPORT_EDGE / Math.max(sourceWidth, sourceHeight),
+    Math.sqrt(MAX_EXPORT_PIXELS / (sourceWidth * sourceHeight)),
+  );
   return {
-    width: Math.max(1, Math.round(inputWidth * scale)),
-    height: Math.max(1, Math.round(inputHeight * scale)),
+    width: Math.max(1, Math.round(sourceWidth * scale)),
+    height: Math.max(1, Math.round(sourceHeight * scale)),
   };
 }
 
@@ -21,24 +24,11 @@ export async function exportArtworkAtSourceRatio(bytes: Buffer, sourceWidth: num
   const metadata = await sharp(bytes, { failOn: "error", limitInputPixels: 50_000_000 }).metadata();
   if (!metadata.width || !metadata.height) throw new Error("malformed_provider_output");
 
-  const target = sourceRatioDimensions(sourceWidth, sourceHeight, Math.max(metadata.width, metadata.height));
+  const target = sourceRatioDimensions(sourceWidth, sourceHeight);
   if (target.width === metadata.width && target.height === metadata.height) return bytes;
 
-  const foregroundSize = containedDimensions(metadata.width, metadata.height, target.width, target.height);
-  const { data: foreground, info } = await sharp(bytes)
-    .resize(foregroundSize.width, foregroundSize.height, { fit: "fill" })
-    .png({ compressionLevel: 9 })
-    .toBuffer({ resolveWithObject: true });
-
-  const background = sharp(bytes).resize(target.width, target.height, { fit: "cover", position: "centre" });
-  if (Math.min(target.width, target.height) >= 8) background.blur(Math.min(24, Math.max(1, Math.min(target.width, target.height) / 40)));
-
-  return background
-    .composite([{
-      input: foreground,
-      left: Math.floor((target.width - info.width) / 2),
-      top: Math.floor((target.height - info.height) / 2),
-    }])
+  return sharp(bytes)
+    .resize(target.width, target.height, { fit: "cover", position: sharp.strategy.attention })
     .png({ compressionLevel: 9 })
     .toBuffer();
 }

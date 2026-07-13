@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const personality = normalizePersonality(form.get("personality")); const image = await validateServerImage(file);
     const store = await getStateStore(); const tokenHash = sha256(token); const set = await store.findSet(tokenHash);
     if (!set || set.referenceSha256 !== image.sha256) throw new Error("reference_mismatch");
-    const prompt = buildGenerationPrompt(styleValue, personality); const size = outputSizeFor(image.width, image.height);
+    const prompt = buildGenerationPrompt(styleValue, personality, { width: image.width, height: image.height }); const size = outputSizeFor(image.width, image.height);
     const reserved = await store.reserve({ tokenHash, idempotencyHash: sha256(idempotencyKey), sessionHash: session.sessionHash, ipHash: clientIpHash(request), styleId: styleValue, personalityLength: personality ? [...personality].length : 0, personalityHash: personality ? sha256(personality) : null, promptVersion: PROMPT_VERSION, model: "gpt-image-2", quality: operatingMode.quality, size, dailyRequestLimit: operatingMode.dailyRequestLimit, hourlyIpLimit: operatingMode.hourlyIpLimit, globalConcurrencyLimit: operatingMode.globalConcurrencyLimit, dailyCostLimitUnits: operatingMode.dailyCostLimitUnits, reservationUnits: operatingMode.reservationUnits });
     if (reserved.kind === "existing") return noStoreJson({ existing: true, status: reserved.generation.status, successfulCount: reserved.set.successfulCount }, reserved.generation.status === "processing" || reserved.generation.status === "reserved" ? 202 : 409);
     generationId = reserved.generation.id; await store.markProcessing(generationId);

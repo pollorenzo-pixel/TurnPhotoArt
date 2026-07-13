@@ -1,6 +1,8 @@
 import type { HouseStyleId } from "@/lib/server/house-styles";
 
-export const PROMPT_VERSION = "turnphotoart-prompt-v5";
+export const PROMPT_VERSION = "turnphotoart-prompt-v6";
+
+type SourceDimensions = { width: number; height: number };
 
 const SHARED_PRESERVATION_RULES = `Transform the uploaded reference photo into one polished, finished illustrated artwork.
 
@@ -25,6 +27,14 @@ Intentionally redraw and artistically reinterpret forms, planes, shading, textur
 Keep the subject as the main focus. Preserve recognisable identity, expression, outfit silhouette, important clothing and accessory cues such as glasses or a bandana when present, approximate pose, framing and overall composition.
 
 Integrate any supporting decorations or personality details into the selected style’s composition, shapes and mark-making. They must feel art-directed as part of the illustration rather than pasted around the subject.
+
+Keep the main subject visually dominant. Decorations must not overcrowd or obscure the face, head, body silhouette or defining features.
+
+Facial rendering must be clearly illustrated while preserving recognisable identity, expression, facial proportions and important defining features.
+
+Simplify facial planes into illustrated shapes. Remove pore-level or camera-level detail, reduce photographic skin texture and realistic specular highlights, and avoid polished photographic portrait rendering or realistic digital-painting facial modelling.
+
+Redraw the eyes, nose, mouth and facial contours consistently with the selected house style. Preserve the expression without recreating the source face pixel by pixel; the face must feel intentionally redrawn rather than photo-painted.
 
 Colour fidelity is a high-priority preservation rule.
 
@@ -68,6 +78,10 @@ Keep details intentionally simplified and graphic.
 
 Reduce photographic rendering decisively. Stylise skin, fabrics and the background into graphic planes and tactile illustrated shapes rather than realistic surfaces.
 
+Render faces with simplified graphic facial planes, flatter illustrated shading, confident shape boundaries, restrained highlights, slightly posterised colour areas and tactile chalk, print or pastel grain. Keep a strong readable silhouette and editorial cartoon portrait energy.
+
+Do not use glossy realistic skin, smooth photographic airbrushing, detailed realistic facial lighting or semi-photorealistic digital portrait painting.
+
 The result must not resemble a painted photo, semi-realistic portrait art, timid photorealism or realistic digital painting. It should have energetic, cheerful, product-worthy, poster-like energy and read immediately as a transformed cartoon illustration.
 
 Use the uploaded photo’s palette as the foundation. Preserve graphic colour blocking without introducing a default warm palette, amber lighting, yellow skin cast, sepia treatment, warm vintage grading or colour spill from decorative elements across the whole image.
@@ -85,6 +99,10 @@ Use organic shapes, loose sketch energy, expressive gestures and carefully simpl
 Create painterly colour areas with a gouache, watercolour, coloured-pencil or digital-brush feeling.
 
 Keep the rendering painterly but simplified: reinterpret skin, fabrics, props and backgrounds as soft illustrated forms, expressive marks and stylised planes instead of realistic photographic surfaces.
+
+Render faces with simplified painterly forms, expressive hand-drawn contours, gentle illustrated exaggeration and gouache, watercolour, coloured-pencil or handmade-brush texture. The face should be a charming storybook-character interpretation with soft but clearly non-photographic rendering.
+
+Do not use realistic watercolour portrait rendering, detailed photographic facial structure, realistic skin gloss or subtle photo-overpaint treatment.
 
 Preserve the subject’s recognisability while allowing charming illustrated expression and gentle exaggeration.
 
@@ -110,6 +128,16 @@ Do not reproduce any character, composition, text, prop arrangement or exact pal
 
 Return only the finished artwork.`;
 
+function compositionSection(sourceDimensions: SourceDimensions | null) {
+  if (!sourceDimensions) return null;
+  const shape = sourceDimensions.width === sourceDimensions.height ? "square" : sourceDimensions.width > sourceDimensions.height ? "landscape" : "portrait";
+  return `Compose for a ${shape} final canvas matching the uploaded source aspect ratio and for a minimal full-bleed cover crop.
+
+Keep the primary subject away from crop-sensitive outer edges. Preserve important face, head, headwear, shoulders, body, clothing and accessory details inside a stable central composition-safe area; keep the eyes and face securely within that area when present.
+
+For animals or objects, keep the primary head, face, body silhouette and defining features within the safe area. Let expendable background illustration extend naturally and continuously to every outer edge so background can be cropped before subject features.`;
+}
+
 function personalitySection(personality: string | null) {
   if (!personality) return null;
   return `Optional personality guidance from the customer: ${personality}
@@ -119,30 +147,31 @@ Apply this only as secondary direction for supporting decorations, background fl
 Do not let it replace the main subject, contradict the selected house style, reduce recognisability or override source colour fidelity or safety rules.`;
 }
 
-function assemblePrompt(styleBlock: string, personality: string | null) {
+function assemblePrompt(styleBlock: string, personality: string | null, sourceDimensions: SourceDimensions | null) {
   return [
     `[Prompt version: ${PROMPT_VERSION}]`,
     SHARED_PRESERVATION_RULES,
+    compositionSection(sourceDimensions),
     styleBlock,
     personalitySection(personality),
     SHARED_OUTPUT_RESTRICTIONS,
   ].filter((section): section is string => Boolean(section)).join("\n\n");
 }
 
-export function buildBoldPlayfulPrompt(personality: string | null = null) {
-  return assemblePrompt(BOLD_PLAYFUL_STYLE, personality);
+export function buildBoldPlayfulPrompt(personality: string | null = null, sourceDimensions: SourceDimensions | null = null) {
+  return assemblePrompt(BOLD_PLAYFUL_STYLE, personality, sourceDimensions);
 }
 
-export function buildPlayfulStorybookPrompt(personality: string | null = null) {
-  return assemblePrompt(PLAYFUL_STORYBOOK_STYLE, personality);
+export function buildPlayfulStorybookPrompt(personality: string | null = null, sourceDimensions: SourceDimensions | null = null) {
+  return assemblePrompt(PLAYFUL_STORYBOOK_STYLE, personality, sourceDimensions);
 }
 
-export function buildArtworkPrompt({ style, personality = null }: { style: HouseStyleId; personality?: string | null }) {
-  if (style === "bold-playful") return buildBoldPlayfulPrompt(personality);
-  if (style === "playful-storybook") return buildPlayfulStorybookPrompt(personality);
+export function buildArtworkPrompt({ style, personality = null, sourceDimensions = null }: { style: HouseStyleId; personality?: string | null; sourceDimensions?: SourceDimensions | null }) {
+  if (style === "bold-playful") return buildBoldPlayfulPrompt(personality, sourceDimensions);
+  if (style === "playful-storybook") return buildPlayfulStorybookPrompt(personality, sourceDimensions);
   throw new Error("invalid_style");
 }
 
-export function buildGenerationPrompt(styleId: HouseStyleId, personality: string | null) {
-  return buildArtworkPrompt({ style: styleId, personality });
+export function buildGenerationPrompt(styleId: HouseStyleId, personality: string | null, sourceDimensions: SourceDimensions | null = null) {
+  return buildArtworkPrompt({ style: styleId, personality, sourceDimensions });
 }
