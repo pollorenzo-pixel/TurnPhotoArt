@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 import { assertGenerationAllowed, operatingMode } from "@/lib/server/config";
 import { sha256 } from "@/lib/server/crypto";
-import { buildGenerationPrompt, isHouseStyleId, PROMPT_VERSION } from "@/lib/server/house-styles";
+import { isHouseStyleId } from "@/lib/server/house-styles";
+import { buildGenerationPrompt, PROMPT_VERSION } from "@/lib/server/prompt-builder";
 import { validateProviderPng, validateServerImage } from "@/lib/server/image-validation";
 import { outputSizeFor } from "@/lib/server/output-size";
 import { normalizePersonality } from "@/lib/server/personality";
