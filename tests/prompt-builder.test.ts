@@ -12,7 +12,7 @@ import {
 const occurrences = (value: string, needle: string) => value.split(needle).length - 1;
 
 test("prompt version and style router are deterministic", () => {
-  assert.equal(PROMPT_VERSION, "turnphotoart-prompt-v4");
+  assert.equal(PROMPT_VERSION, "turnphotoart-prompt-v5");
   assert.equal(buildArtworkPrompt({ style: "bold-playful" }), buildBoldPlayfulPrompt());
   assert.equal(buildArtworkPrompt({ style: "playful-storybook" }), buildPlayfulStorybookPrompt());
   assert.equal(buildGenerationPrompt("bold-playful", null), buildBoldPlayfulPrompt());
@@ -34,8 +34,8 @@ test("Bold & Playful contains only its style language and shared preservation", 
   assert.match(prompt, /flatter and cleaner colour areas/);
   assert.match(prompt, /readable outlines and silhouettes/);
   assert.match(prompt, /Stylise skin, fabrics and the background into graphic planes and tactile illustrated shapes/);
-  assert.match(prompt, /must not resemble a painted photo, semi-realistic portrait art or realistic digital painting/);
-  assert.match(prompt, /cheerful, modern, poster-like energy/);
+  assert.match(prompt, /must not resemble a painted photo, semi-realistic portrait art, timid photorealism or realistic digital painting/);
+  assert.match(prompt, /energetic, cheerful, product-worthy, poster-like energy/);
   assert.match(prompt, /default warm palette, amber lighting, yellow skin cast, sepia treatment, warm vintage grading/);
   assert.doesNotMatch(prompt, /Playful Storybook illustration/);
   assert.doesNotMatch(prompt, /Optional personality guidance from the customer:/);
@@ -54,8 +54,9 @@ test("Playful Storybook contains only its style language and shared preservation
   assert.match(prompt, /clearly illustrated storybook character portrait/);
   assert.match(prompt, /painterly but simplified/);
   assert.match(prompt, /soft illustrated forms, expressive marks and stylised planes/);
-  assert.match(prompt, /must not resemble realistic watercolour portraiture, subtle photo stylisation or lightly processed photography/);
-  assert.match(prompt, /hand-crafted, whimsical storybook artwork/);
+  assert.match(prompt, /realistic overpaint, quasi-photographic rendering, muddy detail retention/);
+  assert.match(prompt, /simple “photo but softer” treatment/);
+  assert.match(prompt, /hand-crafted, whimsical children’s-book artwork/);
   assert.match(prompt, /Warmth describes the emotional atmosphere, not a mandatory warm colour temperature or warm colour grading/);
   assert.match(prompt, /golden lighting, a yellow or orange skin tint, sepia, nostalgic warm filters, an amber wash over cool backgrounds/);
   assert.doesNotMatch(prompt, /Bold & Playful contemporary editorial illustration/);
@@ -66,13 +67,16 @@ test("both styles require decisive non-photographic transformation", () => {
   for (const prompt of [buildBoldPlayfulPrompt(), buildPlayfulStorybookPrompt()]) {
     assert.match(prompt, /fully illustrated, clearly non-photographic artwork/);
     assert.match(prompt, /visually cohesive and unmistakably consistent with the selected house style/);
-    assert.match(prompt, /Do not create a photo-overpaint, photo-filter, lightly stylised photo/);
+    assert.match(prompt, /Do not create a photo-overpaint, photo-filter, lightly stylised photo, realism-first rendering/);
+    assert.match(prompt, /filter-like stylisation or realistic digital painting/);
     assert.match(prompt, /Do not preserve photographic micro-detail or reproduce the source at a pixel-detail level/);
     assert.match(prompt, /realistic skin texture, fabric micro-texture, reflections, photographic micro-contrast/);
     assert.match(prompt, /redraw and artistically reinterpret forms, planes, shading, textures and background structure as simplified illustrated shapes/);
     assert.match(prompt, /designed as an artwork, not processed from a photograph/);
     assert.match(prompt, /Keep the subject as the main focus/);
     assert.match(prompt, /identity, expression, outfit silhouette, important clothing and accessory cues such as glasses or a bandana/);
+    assert.match(prompt, /supporting decorations or personality details into the selected style’s composition, shapes and mark-making/);
+    assert.match(prompt, /rather than pasted around the subject/);
   }
 });
 

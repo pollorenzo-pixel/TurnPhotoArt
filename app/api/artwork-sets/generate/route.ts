@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { exportArtworkAtSourceRatio } from "@/lib/server/artwork-export";
 import { assertGenerationAllowed, operatingMode } from "@/lib/server/config";
 import { sha256 } from "@/lib/server/crypto";
 import { isHouseStyleId } from "@/lib/server/house-styles";
@@ -33,8 +34,9 @@ export async function POST(request: NextRequest) {
     generationId = reserved.generation.id; await store.markProcessing(generationId);
     const provider = await getImageProvider();
     const result = await provider.generate({ reference: image.bytes, mimeType: image.mimeType, width: image.width, height: image.height, styleId: styleValue, prompt, quality: operatingMode.quality, simulation: operatingMode.provider === "fake" ? request.headers.get("x-fake-simulation") : null });
-    await validateProviderPng(result.bytes); const completedSet = await store.settle(generationId, "succeeded", null, { requestId: result.requestId, usage: result.usage });
-    return new Response(new Uint8Array(result.bytes), { status: 200, headers: { "Content-Type": "image/png", "Content-Length": String(result.bytes.length), "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "X-Artwork-Version": String(reserved.generation.sequence), "X-Artwork-Style": styleValue, "X-Successful-Count": String(completedSet.successfulCount) } });
+    await validateProviderPng(result.bytes); const artwork = await exportArtworkAtSourceRatio(result.bytes, image.width, image.height); await validateProviderPng(artwork);
+    const completedSet = await store.settle(generationId, "succeeded", null, { requestId: result.requestId, usage: result.usage });
+    return new Response(new Uint8Array(artwork), { status: 200, headers: { "Content-Type": "image/png", "Content-Length": String(artwork.length), "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "X-Artwork-Version": String(reserved.generation.sequence), "X-Artwork-Style": styleValue, "X-Successful-Count": String(completedSet.successfulCount) } });
   } catch (error) {
     const code = error instanceof Error ? error.message : "internal_error";
     if (generationId) {
