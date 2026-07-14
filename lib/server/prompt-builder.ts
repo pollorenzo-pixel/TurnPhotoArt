@@ -1,6 +1,6 @@
 import type { HouseStyleId } from "@/lib/server/house-styles";
 
-export const PROMPT_VERSION = "turnphotoart-prompt-v6";
+export const PROMPT_VERSION = "turnphotoart-prompt-v7";
 
 type SourceDimensions = { width: number; height: number };
 
@@ -8,13 +8,15 @@ const SHARED_PRESERVATION_RULES = `Transform the uploaded reference photo into o
 
 The uploaded reference photo is the visual source of truth.
 
-Preserve the main subject’s identity, species, distinctive facial or physical features, emotional meaning, important objects, approximate pose, framing and overall composition.
+Preserve identity, facial structure, defining features, pose, gesture, framing, composition, clothing, accessories, important objects, dominant source colours, emotional meaning, subject count and spatial relationships.
 
 Keep the result clearly recognisable as the same person, animal, object or scene shown in the uploaded photo.
 
 Do not replace the main subject or invent a different central subject.
 
-Do not unnecessarily change ethnicity, age, facial structure, body shape, species or defining features.
+Do not unnecessarily change ethnicity, age, body shape, hairstyle, facial expression, species, clothing, accessories, important objects or defining features.
+
+Do not add or remove people or animals unless the customer’s optional personality direction explicitly requests it and the request is safe.
 
 Transform the photo decisively into a fully illustrated, clearly non-photographic artwork that is visually cohesive and unmistakably consistent with the selected house style.
 
@@ -56,71 +58,47 @@ Colours may be slightly simplified, saturated, softened, posterised or painterly
 
 Background details may be simplified or artistically reinterpreted when useful, but they must continue to support the original subject and scene.
 
-Optional personality guidance is secondary. It may influence supporting decorations, background flavour, atmosphere, small colour accents, playful objects, mood or secondary visual storytelling, but it must never override subject recognisability, source colour fidelity, safety rules or the selected house style.`;
+Optional personality guidance is secondary. It may influence supporting decorations, background flavour, atmosphere, small colour accents, playful objects, mood or secondary visual storytelling, but it must never override subject recognisability, identity preservation, safety, important source colours, the selected house style, composition, subject count or defining features.`;
 
-const BOLD_PLAYFUL_STYLE = `Render the reference as a Bold & Playful contemporary editorial illustration.
+const EXPRESSIVE_EDITORIAL_STYLE = `Create an original Expressive Editorial illustration that is clearly redrawn from the reference photo.
 
-Push the transformation toward a strong stylised graphic editorial cartoon portrait with obvious artistic reinterpretation while keeping the subject recognisable.
+Use loose ink, coloured-pencil, dry-brush, wax-crayon, pastel and marker-like strokes with energetic hand-drawn contours and layered marks that feel authored rather than mechanically polished.
 
-Use simplified graphic shapes with bold shape simplification, confident colour blocking with flatter and cleaner colour areas, strong visual masses, readable outlines and silhouettes, and a confident graphic composition.
+Build confidently simplified forms with bold but imperfect colour blocking, visible paper grain, tactile handmade texture and softly irregular boundaries.
 
-Create tactile handmade texture using grainy chalk, dry pastel, printed-paper or softly stippled marks.
+Use spontaneous editorial composition and generous negative space where compatible with the source composition. Add only occasional scribbles, gestural marks or restrained playful symbols.
 
-Use softly irregular handmade edges rather than sterile vector-perfect boundaries.
+Allow selective expressive exaggeration without damaging identity, facial structure, defining features or recognisability.
 
-Allow tasteful playful exaggeration while preserving the subject’s identity and defining features.
+Use a limited but cheerful palette informed by the uploaded photo while preserving its important local colours, original white balance and cool-versus-warm relationships.
 
-Use expressive silhouettes, strong negative space and a restrained number of charming accents such as sparkles, hearts, stars, movement marks or simple decorative shapes when they suit the image.
+Render faces with expressive drawn contours, simplified illustrated planes, restrained highlights and visible pencil, ink, pastel or dry-brush character. Preserve identity and expression without painted-over photographic skin.
 
-The image should feel energetic, cheerful, stylish and premium rather than childish.
+Avoid photorealism, photo filters, painted-over photographic skin or clothing, smooth digital airbrushing, glossy 3D rendering, generic vector art, overly cute children’s illustration and excessive decorative clutter.
 
-Keep details intentionally simplified and graphic.
+The finished image must feel expressive, tactile, contemporary, premium and unmistakably illustrated.`;
 
-Reduce photographic rendering decisively. Stylise skin, fabrics and the background into graphic planes and tactile illustrated shapes rather than realistic surfaces.
+const GEOMETRIC_COLLAGE_STYLE = `Create an original Geometric Collage illustration that is clearly reconstructed from the reference photo.
 
-Render faces with simplified graphic facial planes, flatter illustrated shading, confident shape boundaries, restrained highlights, slightly posterised colour areas and tactile chalk, print or pastel grain. Keep a strong readable silhouette and editorial cartoon portrait energy.
+Use angular, faceted shapes to describe the face, body, clothing, objects and background. Translate recognisable defining features into confident graphic planes without excessive abstraction.
 
-Do not use glossy realistic skin, smooth photographic airbrushing, detailed realistic facial lighting or semi-photorealistic digital portrait painting.
+Build cut-paper, printed-poster and handmade collage qualities with bold flat colour planes, simplified geometric silhouettes and an asymmetric but intentional composition.
 
-The result must not resemble a painted photo, semi-realistic portrait art, timid photorealism or realistic digital painting. It should have energetic, cheerful, product-worthy, poster-like energy and read immediately as a transformed cartoon illustration.
+Mix crisp graphic edges with imperfect hand-drawn line details and subtle ink, paper, print, pencil, stipple and grain textures.
 
-Use the uploaded photo’s palette as the foundation. Preserve graphic colour blocking without introducing a default warm palette, amber lighting, yellow skin cast, sepia treatment, warm vintage grading or colour spill from decorative elements across the whole image.
+Use restrained shadow shapes rather than realistic lighting, with a limited high-contrast palette informed by the uploaded photo and a confident poster-like visual hierarchy.
 
-The finished result should feel like a bold contemporary art print: playful, tactile, recognisable and visually confident.`;
+Render faces and bodies as recognisable faceted planes with simplified geometric modelling, preserving identity, expression and proportions without photographic fragments or realistic skin rendering.
 
-const PLAYFUL_STORYBOOK_STYLE = `Render the reference as a Playful Storybook illustration with expressive hand-drawn linework and painterly colour.
+Avoid photorealism, photographic fragments, literal digital cut-out effects, smooth 3D polygons, generic low-poly rendering, glossy gradients, vector-clean corporate illustration and abstraction that destroys identity.
 
-Push the transformation toward a clearly illustrated storybook character portrait based on the original subject, not a realistic watercolour portrait.
-
-Use lively, flowing and slightly imperfect lines that create emotional warmth, motion and personality.
-
-Use organic shapes, loose sketch energy, expressive gestures and carefully simplified details.
-
-Create painterly colour areas with a gouache, watercolour, coloured-pencil or digital-brush feeling.
-
-Keep the rendering painterly but simplified: reinterpret skin, fabrics, props and backgrounds as soft illustrated forms, expressive marks and stylised planes instead of realistic photographic surfaces.
-
-Render faces with simplified painterly forms, expressive hand-drawn contours, gentle illustrated exaggeration and gouache, watercolour, coloured-pencil or handmade-brush texture. The face should be a charming storybook-character interpretation with soft but clearly non-photographic rendering.
-
-Do not use realistic watercolour portrait rendering, detailed photographic facial structure, realistic skin gloss or subtle photo-overpaint treatment.
-
-Preserve the subject’s recognisability while allowing charming illustrated expression and gentle exaggeration.
-
-Give the composition a sense of narrative, emotional warmth and playful movement, even when the source photo is calm or simple. Warmth describes the emotional atmosphere, not a mandatory warm colour temperature or warm colour grading.
-
-Supporting background elements may be softened, simplified or made more whimsical while remaining connected to the original scene.
-
-Create clear transformation away from photo realism. The result must not resemble realistic watercolour portraiture, a realistic overpaint, quasi-photographic rendering, muddy detail retention, subtle photo stylisation or a simple “photo but softer” treatment; it should feel intentionally redrawn as a hand-crafted, whimsical children’s-book artwork.
-
-The image should feel contemporary, lively, charming, imaginative and emotionally engaging rather than overly polished, photorealistic or flat.
-
-Keep the uploaded photo’s original palette and white balance recognisable even when the rendering becomes softer or more painterly. Do not automatically introduce golden lighting, a yellow or orange skin tint, sepia, nostalgic warm filters, an amber wash over cool backgrounds or loss of neutral blacks, greys or whites.
-
-The finished result should feel like a memorable page from a modern illustrated storybook: expressive, charming, dynamic and recognisable.`;
+The finished image must feel bold, graphic, sophisticated, tactile, collectible and unmistakably illustrated.`;
 
 const SHARED_OUTPUT_RESTRICTIONS = `Produce one polished standalone illustration.
 
-Do not create a collage, diptych, triptych, split-screen, before-and-after comparison, contact sheet, app interface, phone frame, product mockup or instructional diagram.
+Do not create a multi-image collage, diptych, triptych, split-screen, before-and-after comparison, contact sheet, app interface, phone frame, product mockup or instructional diagram.
+
+For Geometric Collage, use collage as the illustration construction technique within one continuous standalone artwork, never as a multi-panel or multiple-image layout.
 
 Do not include captions, labels, signatures, watermarks, logos or unrelated written text.
 
@@ -144,7 +122,7 @@ function personalitySection(personality: string | null) {
 
 Apply this only as secondary direction for supporting decorations, background flavour, atmosphere, small colour accents, playful objects, mood or secondary visual storytelling. Requested decorative elements may use their own colours, but they must not recolour the entire artwork.
 
-Do not let it replace the main subject, contradict the selected house style, reduce recognisability or override source colour fidelity or safety rules.`;
+Do not let it replace the main subject, contradict the selected house style, reduce recognisability, change composition, subject count or defining features, or override source colour fidelity or safety rules.`;
 }
 
 function assemblePrompt(styleBlock: string, personality: string | null, sourceDimensions: SourceDimensions | null) {
@@ -158,17 +136,17 @@ function assemblePrompt(styleBlock: string, personality: string | null, sourceDi
   ].filter((section): section is string => Boolean(section)).join("\n\n");
 }
 
-export function buildBoldPlayfulPrompt(personality: string | null = null, sourceDimensions: SourceDimensions | null = null) {
-  return assemblePrompt(BOLD_PLAYFUL_STYLE, personality, sourceDimensions);
+export function buildExpressiveEditorialPrompt(personality: string | null = null, sourceDimensions: SourceDimensions | null = null) {
+  return assemblePrompt(EXPRESSIVE_EDITORIAL_STYLE, personality, sourceDimensions);
 }
 
-export function buildPlayfulStorybookPrompt(personality: string | null = null, sourceDimensions: SourceDimensions | null = null) {
-  return assemblePrompt(PLAYFUL_STORYBOOK_STYLE, personality, sourceDimensions);
+export function buildGeometricCollagePrompt(personality: string | null = null, sourceDimensions: SourceDimensions | null = null) {
+  return assemblePrompt(GEOMETRIC_COLLAGE_STYLE, personality, sourceDimensions);
 }
 
 export function buildArtworkPrompt({ style, personality = null, sourceDimensions = null }: { style: HouseStyleId; personality?: string | null; sourceDimensions?: SourceDimensions | null }) {
-  if (style === "bold-playful") return buildBoldPlayfulPrompt(personality, sourceDimensions);
-  if (style === "playful-storybook") return buildPlayfulStorybookPrompt(personality, sourceDimensions);
+  if (style === "bold-playful") return buildExpressiveEditorialPrompt(personality, sourceDimensions);
+  if (style === "playful-storybook") return buildGeometricCollagePrompt(personality, sourceDimensions);
   throw new Error("invalid_style");
 }
 

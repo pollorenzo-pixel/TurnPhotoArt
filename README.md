@@ -25,7 +25,7 @@ It also requires valid private-access, Supabase, and OpenAI configuration. Missi
 - Browser resubmits the reference for each generation; the backend validates MIME, magic bytes, decoding, dimensions, and fingerprint.
 - Raw references, generated images, filenames, complete prompts, and complete personality text are never stored in Supabase.
 - Generated PNGs return as `no-store` binary responses and live only in current-tab blob URLs until downloaded.
-- Two server-owned styles: `bold-playful` and `playful-storybook`, prompt version `turnphotoart-prompt-v1`.
+- Two server-owned styles: Expressive Editorial (`bold-playful`) and Geometric Collage (`playful-storybook`), prompt version `turnphotoart-prompt-v7`.
 - Optional normalized personality direction is limited to 160 characters and remains secondary to preservation and style rules.
 
 ## Three successful versions and Cost Guard

@@ -1,6 +1,6 @@
 export const PUBLIC_HOUSE_STYLES = [
-  { id: "bold-playful", name: "Bold & Playful", description: "Bright, cheerful and full of personality." },
-  { id: "playful-storybook", name: "Playful Storybook", description: "Soft, dreamy and lovingly hand-painted." },
+  { id: "bold-playful", name: "Expressive Editorial", description: "Loose, lively and full of handmade character." },
+  { id: "playful-storybook", name: "Geometric Collage", description: "Bold geometric shapes with a richly textured collage finish." },
 ] as const;
 
 export type HouseStyleId = (typeof PUBLIC_HOUSE_STYLES)[number]["id"];
