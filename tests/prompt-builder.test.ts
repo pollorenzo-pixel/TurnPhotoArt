@@ -140,7 +140,7 @@ test("active UI copy uses central new style metadata and contains no obsolete vi
   const landing = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
   const obsoleteNames = [["Bold", "&", "Playful"].join(" "), ["Playful", "Storybook"].join(" ")];
   for (const source of [publicStyles, studio, landing]) for (const name of obsoleteNames) assert.ok(!source.includes(name));
-  assert.match(landing, /Choose an expressive hand-drawn look or a bold geometric collage/);
+  assert.match(landing, /Choose a loose hand-drawn finish or a bold geometric collage/);
   assert.match(studio, /PUBLIC_HOUSE_STYLES\.map/);
   assert.doesNotMatch(publicStyles, /buildGenerationPrompt|SHARED_PRESERVATION|Prompt version/);
   assert.doesNotMatch(studio, /prompt-builder|visual source of truth|standalone illustration/);
